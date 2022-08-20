@@ -17,7 +17,7 @@ export class SessionStoreService {
   }
 
   public getCurrentSession(): NamedSession {
-    return this.currentSession.clone();
+    return this.currentSession;
   }
 
   public setCurrentSessionCookies(cookieJar: CookieJar): void {
