@@ -12,6 +12,10 @@ export class AppService {
     this.currentSession = jar();
   }
 
+  public setCurrentSession(cookie: CookieJar): void {
+    this.currentSession = cookie;
+  }
+
   public getCurrentSession(): CookieJar {
     return this.currentSession;
   }
