@@ -27,7 +27,7 @@ async function bootstrap() {
         await service.exec(parse(args.toString()));
         process.stdout.write('\n> ');
       } catch (err) {
-        console.error(err);
+        console.error(err.message);
       }
 
       process.stdin.resume();
