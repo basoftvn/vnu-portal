@@ -16,11 +16,16 @@ async function bootstrap() {
     const service = await app.select(CommandModule).get(CommandService);
     yargs.scriptName('').exitProcess(false);
 
+    yargs.showHelp('log');
+
+    process.stdout.write('> ');
+
     process.stdin.on('data', async (args) => {
       process.stdin.pause();
 
       try {
         await service.exec(parse(args.toString()));
+        process.stdout.write('\n> ');
       } catch (err) {
         console.error(err);
       }
