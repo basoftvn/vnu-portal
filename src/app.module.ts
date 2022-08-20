@@ -1,15 +1,12 @@
 import { CommandModule } from 'nestjs-command';
 
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
-import { AppService } from './app.service';
-import { UtilsModule } from './utils/utils.module';
+import { CreditModule } from './credit/credit.module';
 import { SessionModule } from './session/session.module';
+import { UtilsModule } from './utils/utils.module';
 
-@Global()
 @Module({
-  imports: [CommandModule, UtilsModule, SessionModule],
-  providers: [AppService],
-  exports: [AppService],
+  imports: [CommandModule, UtilsModule, SessionModule, CreditModule],
 })
 export class AppModule {}
