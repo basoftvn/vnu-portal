@@ -31,12 +31,4 @@ export class NamedSession {
     for (const cookie of newCookies)
       this.cookieJar.setCookie(cookie, Endpoints.Origin);
   }
-
-  public clone(): NamedSession {
-    const cloned = new NamedSession();
-
-    cloned.setCookieJar(this.cookieJar);
-
-    return cloned;
-  }
 }
