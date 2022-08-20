@@ -63,6 +63,15 @@ export class CreditService {
     })
     lecturer: string,
     @Option({
+      name: 'registrable',
+      alias: 'r',
+      describe:
+        'Lọc những lớp có thể đăng ký hay không (không áp dụng cho đã đăng ký)',
+      type: 'boolean',
+      default: undefined,
+    })
+    registrable: boolean,
+    @Option({
       name: 'limit',
       alias: 'lm',
       describe: 'Giới hạn số lượng môn học được in ra (start-count)',
@@ -135,6 +144,9 @@ export class CreditService {
 
     const filteredResult: Subject[] = result.filter((subject) => {
       if (by === 'r') return true;
+
+      if (registrable === true && subject.id === -1) return false;
+      if (registrable === false && subject.id !== -1) return false;
 
       if (
         typeof name === 'string' &&
