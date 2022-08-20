@@ -14,10 +14,18 @@ async function bootstrap() {
 
   try {
     const service = await app.select(CommandModule).get(CommandService);
-    yargs.scriptName('');
+    yargs.scriptName('').exitProcess(false);
 
-    process.stdin.on('data', (args) => {
-      service.exec(parse(args.toString()));
+    process.stdin.on('data', async (args) => {
+      process.stdin.pause();
+
+      try {
+        await service.exec(parse(args.toString()));
+      } catch (err) {
+        console.error(err);
+      }
+
+      process.stdin.resume();
     });
   } catch (error) {
     console.error(error);
