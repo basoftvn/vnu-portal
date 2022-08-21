@@ -1,4 +1,4 @@
-import { yellow, green } from 'chalk';
+import { red, yellow, green } from 'chalk';
 import { Command, Option, Positional } from 'nestjs-command';
 import { Subject } from 'src/models/subject';
 
@@ -39,58 +39,64 @@ export class CreditController {
     @Option(declaration.list.options.limit)
     _limit: string,
   ): Promise<void> {
-    if (!_limit.match(/^\d+\-\d+$/)) {
-      console.error('Giới hạn không hợp lệ');
-      return;
-    }
+    try {
+      if (!_limit.match(/^\d+\-\d+$/)) {
+        console.error('Giới hạn không hợp lệ');
+        return;
+      }
 
-    const limit = _limit.split('-').map(Number);
+      const limit = _limit.split('-').map(Number);
 
-    const list = await this.creditService.fetchCreditList(by);
+      const list = await this.creditService.fetchCreditList(by);
 
-    const uName = name?.toUpperCase();
-    const uCode = code?.toUpperCase();
-    const uLecturer = lecturer?.toUpperCase();
+      const uName = name?.toUpperCase();
+      const uCode = code?.toUpperCase();
+      const uLecturer = lecturer?.toUpperCase();
 
-    const filteredList: Subject[] = list.filter((subject) => {
-      if (by === 'r') return true;
+      const filteredList: Subject[] = list.filter((subject) => {
+        if (by === 'r') return true;
 
-      if (registrable === true && subject.id === -1) return false;
-      if (registrable === false && subject.id !== -1) return false;
+        if (registrable === true && subject.id === -1) return false;
+        if (registrable === false && subject.id !== -1) return false;
 
-      if (
-        typeof name === 'string' &&
-        !subject.name.toUpperCase().includes(uName)
-      )
-        return false;
+        if (
+          typeof name === 'string' &&
+          !subject.name.toUpperCase().includes(uName)
+        )
+          return false;
 
-      if (
-        typeof code === 'string' &&
-        !subject.code.toUpperCase().includes(uCode)
-      )
-        return false;
+        if (
+          typeof code === 'string' &&
+          !subject.code.toUpperCase().includes(uCode)
+        )
+          return false;
 
-      if (
-        typeof lecturer === 'string' &&
-        !subject.lecturer.toUpperCase().includes(uLecturer)
-      )
-        return false;
+        if (
+          typeof lecturer === 'string' &&
+          !subject.lecturer.toUpperCase().includes(uLecturer)
+        )
+          return false;
 
-      return true;
-    });
+        return true;
+      });
 
-    console.log(
-      columnify(filteredList.slice(limit[0], limit[0] + limit[1]), {
-        columnSplitter: '|',
-        maxLineWidth: process.stdout.getWindowSize()[0],
-        headingTransform: (header) => CreditController.HEADER_MAP[header],
-      }),
-    );
-
-    if (by === 'r')
       console.log(
-        `Tổng số tín: [${green(list.reduce((a, b) => a + b.creditCount, 0))}]`,
+        columnify(filteredList.slice(limit[0], limit[0] + limit[1]), {
+          columnSplitter: '|',
+          maxLineWidth: process.stdout.getWindowSize()[0],
+          headingTransform: (header) => CreditController.HEADER_MAP[header],
+        }),
       );
+
+      if (by === 'r')
+        console.log(
+          `Tổng số tín: [${green(
+            list.reduce((a, b) => a + b.creditCount, 0),
+          )}]`,
+        );
+    } catch (err) {
+      console.error(red(err.message));
+    }
   }
 
   @Command(declaration.register.command)
@@ -100,47 +106,51 @@ export class CreditController {
     @Option(declaration.register.options.force)
     force: boolean,
   ): Promise<void> {
-    if (force)
-      console.log(
-        yellow(
-          'Bạn đã sử dụng flag --force, đăng kí học sẽ được thử đến khi đăng kí được',
-        ),
-      );
+    try {
+      if (force)
+        console.log(
+          yellow(
+            'Bạn đã sử dụng flag --force, đăng kí học sẽ được thử đến khi đăng kí được',
+          ),
+        );
 
-    console.log(yellow('Kiểm tra các Id môn học'));
+      console.log(yellow('Kiểm tra các Id môn học'));
 
-    for (const id of creditIds)
-      if (Number.isNaN(id)) {
-        console.error('Id không hợp lệ');
+      for (const id of creditIds)
+        if (Number.isNaN(id)) {
+          console.error('Id không hợp lệ');
+          return;
+        }
+
+      const creditIdSet = new Set(creditIds);
+      const tmpCreditIdSet = new Set(creditIdSet);
+
+      const list = await this.creditService.fetchCreditList('a');
+
+      for (const subject of list)
+        if (tmpCreditIdSet.has(subject.id)) tmpCreditIdSet.delete(subject.id);
+
+      if (tmpCreditIdSet.size !== 0) {
+        console.error(
+          `Id môn học không tồn tại: ${[...tmpCreditIdSet].join(', ')}`,
+        );
+
         return;
       }
 
-    const creditIdSet = new Set(creditIds);
-    const tmpCreditIdSet = new Set(creditIdSet);
+      console.log(green('Tất cả các Id hợp lệ'));
 
-    const list = await this.creditService.fetchCreditList('a');
-
-    for (const subject of list)
-      if (tmpCreditIdSet.has(subject.id)) tmpCreditIdSet.delete(subject.id);
-
-    if (tmpCreditIdSet.size !== 0) {
-      console.error(
-        `Id môn học không tồn tại: ${[...tmpCreditIdSet].join(', ')}`,
+      const result = await Promise.all(
+        [...creditIdSet].map((id) =>
+          this.creditService.registerCredit(id, force),
+        ),
       );
 
-      return;
+      console.log(
+        `Đăng ký thành công [${green(result.filter((r) => r)).length}] lớp học`,
+      );
+    } catch (err) {
+      console.error(red(err.message));
     }
-
-    console.log(green('Tất cả các Id hợp lệ'));
-
-    const result = await Promise.all(
-      [...creditIdSet].map((id) =>
-        this.creditService.registerCredit(id, force),
-      ),
-    );
-
-    console.log(
-      `Đăng ký thành công [${green(result.filter((r) => r)).length}] lớp học`,
-    );
   }
 }
