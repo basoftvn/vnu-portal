@@ -1,4 +1,4 @@
-import { green, yellow } from 'chalk';
+import { red, green, yellow } from 'chalk';
 import { Command, Option, Positional } from 'nestjs-command';
 
 import { Injectable } from '@nestjs/common';
@@ -18,28 +18,36 @@ export class SessionController {
     password: string,
     @Option(declaration.login.options.force)
     force: boolean,
+    @Option(declaration.login.options.verbose)
+    verbose: boolean,
   ): Promise<void> {
-    console.clear();
+    try {
+      console.clear();
 
-    console.log(yellow('Đã tạo phiên đăng nhập mới...'));
+      console.log(yellow('Đã tạo phiên đăng nhập mới...'));
 
-    console.log(
-      yellow(
-        `Đang đăng nhập với tên đăng nhập "${username}", mật khẩu ${'*'.repeat(
-          password.length,
-        )}`,
-      ),
-    );
+      if (verbose)
+        console.log(
+          yellow(
+            `Đang đăng nhập với tên đăng nhập "${username}", mật khẩu ${'*'.repeat(
+              password.length,
+            )}`,
+          ),
+        );
 
-    if (force)
-      console.log(
-        yellow(
-          'Bạn đã sử dụng flag --force, phiên đăng nhập sẽ được thử đến khi đăng nhập được hoặc server báo lỗi sai thông tin đăng nhập',
-        ),
-      );
+      if (force && verbose)
+        console.log(
+          yellow(
+            'Bạn đã sử dụng flag --force, phiên đăng nhập sẽ được thử đến khi đăng nhập được hoặc server báo lỗi sai thông tin đăng nhập',
+          ),
+        );
 
-    await this.sessionService.login(username, password, force);
+      await this.sessionService.login(username, password, force);
 
-    console.log(green('Đăng nhập thành công'));
+      console.log(green('Đăng nhập thành công'));
+    } catch (err) {
+      if (verbose) console.error(red(err.message));
+      console.error(red('Đăng nhập thất bại'));
+    }
   }
 }

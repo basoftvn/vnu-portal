@@ -1,6 +1,9 @@
 import { CommandDeclaration } from 'src/models/command-declaration';
 
-const loginCommand: CommandDeclaration<'username' | 'password', 'force'> = {
+const loginCommand: CommandDeclaration<
+  'username' | 'password',
+  'force' | 'verbose'
+> = {
   command: {
     command: 'session:login <username> <password>',
     describe: 'Đăng nhập vào trang đăng ký học bằng một phiên mới',
@@ -24,6 +27,13 @@ const loginCommand: CommandDeclaration<'username' | 'password', 'force'> = {
       name: 'force',
       alias: 'f',
       describe: 'Thử lại đăng nhập đến khi được',
+      type: 'boolean',
+      default: false,
+    },
+    verbose: {
+      name: 'verbose',
+      alias: 'vv',
+      describe: 'Hiển thị nhiều thông tin hơn',
       type: 'boolean',
       default: false,
     },
