@@ -12,6 +12,8 @@ async function bootstrap() {
     logger: false,
   });
 
+  await app.init();
+
   try {
     const service = await app.select(CommandModule).get(CommandService);
     yargs.scriptName('').exitProcess(false);
@@ -25,10 +27,11 @@ async function bootstrap() {
 
       try {
         await service.exec(parse(args.toString()));
-        process.stdout.write('\n> ');
       } catch (err) {
         console.error(err.message);
       }
+
+      process.stdout.write('\n> ');
 
       process.stdin.resume();
     });
