@@ -1,12 +1,12 @@
 {
-  "name": "@basoft/vnu-portal",
+  "name": "@basoftvn/vnu-portal",
   "version": "0.0.1",
   "description": "Vietnam National University, Ha Noi - Interactive CLI application for credit registration",
   "author": "Hai Binh Ng. <binhmattroi@gmail.com>",
   "private": false,
   "license": "GPL-3.0-or-later",
   "bin": {
-    "vnu-portal": "./cli"
+    "vnu-portal": "cli"
   },
   "scripts": {
     "prebuild": "rimraf dist",
@@ -84,5 +84,18 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "main": "dist/main.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basoftvn/vnu-portal.git"
+  },
+  "types": "./dist/main.d.ts",
+  "bugs": {
+    "url": "https://github.com/basoftvn/vnu-portal/issues"
+  },
+  "homepage": "https://github.com/basoftvn/vnu-portal#readme"
 }
