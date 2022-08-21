@@ -1,14 +1,12 @@
-import { green } from 'chalk';
 import { load } from 'cheerio';
-import { Command, Option } from 'nestjs-command';
 import { Endpoints } from 'src/constants/endpoints';
 import { Subject } from 'src/models/subject';
 import { SessionStoreService } from 'src/session/session-store.service';
 
 import { Injectable } from '@nestjs/common';
 
-import columnify = require('columnify');
 import request = require('request-promise-native');
+
 @Injectable()
 export class CreditService {
   private static readonly HEADER_MAP: Record<keyof Subject, string> = {
@@ -27,66 +25,7 @@ export class CreditService {
     private readonly sessionStoreService: SessionStoreService,
   ) {}
 
-  @Command({
-    command: 'credit:list',
-    describe: 'Liệt kê các môn học',
-  })
-  public async listCredits(
-    @Option({
-      name: 'by',
-      alias: 'b',
-      describe: 'Liệt kê các môn theo s(ngành)/a(toàn trường)/r(đã đăng ký)',
-      type: 'string',
-      choices: ['s', 'a', 'r'],
-      default: 'a',
-    })
-    by: string,
-    @Option({
-      name: 'name',
-      alias: 'n',
-      describe: 'Tên môn học (không áp dụng cho đã đăng ký)',
-      type: 'string',
-    })
-    name: string,
-    @Option({
-      name: 'code',
-      alias: 'c',
-      describe: 'Mã lớp học (không áp dụng cho đã đăng ký)',
-      type: 'string',
-    })
-    code: string,
-    @Option({
-      name: 'lecturer',
-      alias: 'l',
-      describe: 'Tên giảng viên (không áp dụng cho đã đăng ký)',
-      type: 'string',
-    })
-    lecturer: string,
-    @Option({
-      name: 'registrable',
-      alias: 'r',
-      describe:
-        'Lọc những lớp có thể đăng ký hay không (không áp dụng cho đã đăng ký)',
-      type: 'boolean',
-      default: undefined,
-    })
-    registrable: boolean,
-    @Option({
-      name: 'limit',
-      alias: 'lm',
-      describe: 'Giới hạn số lượng môn học được in ra (start-count)',
-      type: 'string',
-      default: '0-9999',
-    })
-    _limit: string,
-  ): Promise<void> {
-    if (!_limit.match(/^\d+\-\d+$/)) {
-      console.error('Giới hạn không hợp lệ');
-      return;
-    }
-
-    const limit = _limit.split('-').map(Number);
-
+  public async fetchCreditList(by: string): Promise<Subject[]> {
     const endpoint = Endpoints[`ListBy${by.toUpperCase()}`];
 
     const raw = await request(endpoint, {
@@ -138,50 +77,38 @@ export class CreditService {
       result.push(subject);
     }
 
-    const uName = name?.toUpperCase();
-    const uCode = code?.toUpperCase();
-    const uLecturer = lecturer?.toUpperCase();
+    return result;
+  }
 
-    const filteredResult: Subject[] = result.filter((subject) => {
-      if (by === 'r') return true;
+  public registerCredit(id: number, force: boolean): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      try {
+        const jar = this.sessionStoreService.getCurrentSession().getCookieJar();
 
-      if (registrable === true && subject.id === -1) return false;
-      if (registrable === false && subject.id !== -1) return false;
+        const selectRes = await request(
+          Endpoints.Select.replace('$', id.toString()),
+          {
+            method: 'POST',
+            jar,
+            json: true,
+          },
+        );
 
-      if (
-        typeof name === 'string' &&
-        !subject.name.toUpperCase().includes(uName)
-      )
-        return false;
+        if (!selectRes.success) throw new Error(selectRes.message);
 
-      if (
-        typeof code === 'string' &&
-        !subject.code.toUpperCase().includes(uCode)
-      )
-        return false;
+        const confirmRes = await request(Endpoints.ConfirmRegistration, {
+          method: 'POST',
+          jar,
+          json: true,
+        });
 
-      if (
-        typeof lecturer === 'string' &&
-        !subject.lecturer.toUpperCase().includes(uLecturer)
-      )
-        return false;
+        if (!confirmRes.success) throw new Error(confirmRes.message);
 
-      return true;
+        resolve(true);
+      } catch (err) {
+        console.error(err.message);
+        resolve(false);
+      }
     });
-
-    console.log(
-      columnify(filteredResult.slice(limit[0], limit[0] + limit[1]), {
-        columnSplitter: '|',
-        maxLineWidth: process.stdout.getWindowSize()[0],
-        headingTransform: (header) => CreditService.HEADER_MAP[header],
-      }),
-    );
-
-    if (by === 'r')
-      console.log(
-        `Tổng số tín: ${green(
-          `[${result.reduce((a, b) => a + b.creditCount, 0)}]`,
-        )}`,
-      );
   }
 }
