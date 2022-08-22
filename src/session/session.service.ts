@@ -3,18 +3,21 @@ import { stringify } from 'querystring';
 import { jar } from 'request';
 import { Endpoints } from 'src/constants/endpoints';
 
-import { Injectable } from '@nestjs/common';
-import { Interval } from '@nestjs/schedule';
+import { Injectable, Scope } from '@nestjs/common';
 
 import { SessionStoreService } from './session-store.service';
 
 import request = require('request-promise-native');
 
-@Injectable()
+@Injectable({
+  scope: Scope.DEFAULT,
+})
 export class SessionService {
   public constructor(
     private readonly sessionStoreService: SessionStoreService,
-  ) {}
+  ) {
+    setInterval(this.wakeSession.bind(this), 60000);
+  }
 
   public async login(
     username: string,
@@ -57,10 +60,11 @@ export class SessionService {
     this.sessionStoreService.setCurrentSessionCookies(newSession);
   }
 
-  @Interval(5)
   public async wakeSession(): Promise<void> {
-    console.log('called');
-    return;
+    const currentSession = this.sessionStoreService.getCurrentSession();
+    const credentials = currentSession.getCredentials();
+
+    if (credentials.username === null || credentials.password === null) return;
 
     try {
       console.log('called');
