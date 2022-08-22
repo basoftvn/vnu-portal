@@ -11,18 +11,6 @@ import request = require('request-promise-native');
 
 @Injectable()
 export class CreditService {
-  private static readonly HEADER_MAP: Record<keyof Subject, string> = {
-    id: 'ID',
-    name: 'Tên môn học',
-    creditCount: 'Số tín',
-    code: 'Mã lớp',
-    maxSlots: 'Tổng SV',
-    currentSlots: 'Đã ĐK',
-    lecturer: 'Giảng viên',
-    fee: 'Học phí',
-    schedule: 'Lịch học',
-  };
-
   public constructor(
     private readonly sessionStoreService: SessionStoreService,
   ) {}
