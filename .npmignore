@@ -4,3 +4,8 @@ test
 .eslintrc.js
 .gitignore
 .prettierrc
+nest-cli.json
+tsconfig*.json
+*.map
+*.d.ts
+*.tsbuildinfo
