@@ -1,7 +1,6 @@
 import { load } from 'cheerio';
 import { Endpoints } from 'src/constants/endpoints';
-import { sleep } from 'src/helpers/sleep';
-import { bySeconds } from 'src/helpers/timespan';
+import { wait } from 'src/helpers/wait';
 import { Subject } from 'src/models/subject';
 import { SessionStoreService } from 'src/session/session-store.service';
 
@@ -91,8 +90,7 @@ export class CreditService {
 
       if (!selectRes.success && !force) throw new Error(selectRes.message);
 
-      // sleep from 2-5 seconds
-      await sleep(Math.random() * bySeconds(3) + bySeconds(2));
+      await wait();
     } while (force && !succeeded);
   }
 
