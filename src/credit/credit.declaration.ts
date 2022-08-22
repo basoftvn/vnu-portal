@@ -2,7 +2,7 @@ import { CommandDeclaration } from 'src/models/command-declaration';
 
 const listCommand: CommandDeclaration<
   undefined,
-  'by' | 'name' | 'code' | 'lecturer' | 'registrable' | 'limit'
+  'by' | 'name' | 'code' | 'lecturer' | 'registrable' | 'limit' | 'verbose'
 > = {
   command: {
     command: 'credit:list',
@@ -50,6 +50,13 @@ const listCommand: CommandDeclaration<
       describe: 'Giới hạn số lượng môn học được in ra (start-count)',
       type: 'string',
       default: '0-9999',
+    },
+    verbose: {
+      name: 'verbose',
+      alias: 'vv',
+      describe: 'Hiển thị nhiều thông tin hơn',
+      type: 'boolean',
+      default: false,
     },
   },
 };

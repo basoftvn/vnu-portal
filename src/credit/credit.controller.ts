@@ -41,6 +41,8 @@ export class CreditController {
     registrable: boolean,
     @Option(declaration.list.options.limit)
     _limit: string,
+    @Option(declaration.list.options.verbose)
+    verbose: boolean,
   ): Promise<void> {
     try {
       if (!_limit.match(/^\d+\-\d+$/)) {
@@ -143,7 +145,9 @@ export class CreditController {
           )}]`,
         );
     } catch (err) {
-      console.error(red(err.message));
+      if (verbose) console.error(red(err.message));
+
+      console.error(red('Đăng ký học không thành công'));
     }
   }
 
