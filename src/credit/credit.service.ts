@@ -50,20 +50,28 @@ export class CreditService {
             .replace(/(\s\s+)/g, ' ') ?? '',
         maxSlots: by === 'r' ? -1 : +$raw(cells[5]).text().trim() ?? 0,
         currentSlots: by === 'r' ? -1 : +$raw(cells[6]).text().trim() ?? 0,
-        lecturer: (
-          $raw(cells[by === 'r' ? 4 : 7])
-            .text()
-            .trim() ?? ''
-        ).split(/,\s*/),
+        lecturer: [
+          ...new Set(
+            (
+              $raw(cells[by === 'r' ? 4 : 7])
+                .text()
+                .trim() ?? ''
+            ).split(/,\s*/),
+          ),
+        ],
         fee:
           by === 'r'
             ? -1
             : +($raw(cells[8]).text().trim().replace(/\D/g, '') || '0'),
-        schedule: (
-          $raw(cells[by === 'r' ? 5 : 9])
-            .text()
-            .trim() ?? ''
-        ).split(/,\s*/),
+        schedule: [
+          ...new Set(
+            (
+              $raw(cells[by === 'r' ? 5 : 9])
+                .text()
+                .trim() ?? ''
+            ).split(/,\s*/),
+          ),
+        ],
         invalid: false,
       };
 
