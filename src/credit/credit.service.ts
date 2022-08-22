@@ -76,7 +76,7 @@ export class CreditService {
       };
 
       if (subject.id === -1) subject.invalid = true;
-      if ($row.attr('title').includes('bị trùng lịch học'))
+      if ($row.attr('title')?.includes('bị trùng lịch học'))
         subject.invalid = true;
 
       result.push(subject);
