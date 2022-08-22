@@ -1,6 +1,6 @@
 import { homedir } from 'os';
 import { join } from 'path';
-import { NamedSession } from 'src/models/named-session';
+import { LoginSession } from 'src/models/login-session';
 
 import { Injectable, Scope } from '@nestjs/common';
 import { CookieJar } from 'request';
@@ -8,15 +8,15 @@ import { CookieJar } from 'request';
 @Injectable({ scope: Scope.DEFAULT })
 export class SessionStoreService {
   private readonly rootPath: string;
-  private currentSession: NamedSession;
+  private currentSession: LoginSession;
 
   public constructor() {
     this.rootPath = join(homedir(), '.vnu-portal');
 
-    this.currentSession = new NamedSession();
+    this.currentSession = new LoginSession();
   }
 
-  public getCurrentSession(): NamedSession {
+  public getCurrentSession(): LoginSession {
     return this.currentSession;
   }
 

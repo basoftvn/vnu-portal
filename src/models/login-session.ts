@@ -1,9 +1,12 @@
 import { CookieJar, jar } from 'request';
 import { Endpoints } from 'src/constants/endpoints';
 
-export class NamedSession {
+import { Credentials } from './credentials';
+
+export class LoginSession {
   private name: string;
   private readonly cookieJar: CookieJar;
+  private readonly credentials: Credentials;
 
   public constructor() {
     this.cookieJar = jar();
