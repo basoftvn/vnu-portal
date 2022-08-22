@@ -8,6 +8,8 @@ import { Injectable, Scope } from '@nestjs/common';
 import { SessionStoreService } from './session-store.service';
 
 import request = require('request-promise-native');
+import { sleep } from 'src/helpers/sleep';
+import { bySeconds } from 'src/helpers/timespan';
 
 @Injectable({
   scope: Scope.DEFAULT,
@@ -52,9 +54,12 @@ export class SessionService {
           jar: newSession,
           followAllRedirects: true,
         });
+      } catch (err) {
+        if (!force) throw err;
 
-        break;
-      } catch (err) {}
+        // sleep from 2-5 seconds
+        await sleep(Math.random() * bySeconds(3) + bySeconds(2));
+      }
     } while (force);
 
     this.sessionStoreService.setCurrentSessionCookies(newSession);
