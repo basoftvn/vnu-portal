@@ -10,6 +10,10 @@ export class LoginSession {
 
   public constructor() {
     this.cookieJar = jar();
+    this.credentials = {
+      username: null,
+      password: null,
+    };
   }
 
   public setName(name: string): void {
@@ -33,5 +37,14 @@ export class LoginSession {
 
     for (const cookie of newCookies)
       this.cookieJar.setCookie(cookie, Endpoints.Origin);
+  }
+
+  public getCredentials(): Credentials {
+    return { ...this.credentials };
+  }
+
+  public setCredentials(newCredentials: Credentials): void {
+    this.credentials.username = newCredentials.username;
+    this.credentials.password = newCredentials.password;
   }
 }
