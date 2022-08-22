@@ -23,6 +23,7 @@ export class IoService {
     const result = await this.input.ask<T>(prompt, callback);
 
     process.stdin.setRawMode(false);
+    process.stdin.resume();
 
     return result;
   }
@@ -36,6 +37,7 @@ export class IoService {
     const result = await this.input.password(prompt, callback);
 
     process.stdin.setRawMode(false);
+    process.stdin.resume();
 
     return result;
   }
