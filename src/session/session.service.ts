@@ -107,7 +107,8 @@ export class SessionService {
         return;
       }
     } catch (err) {
-      console.error(err.message);
+      console.error(red('Duy trì phiên đăng nhập thất bại'));
+      console.error(yellow('Có lẽ bạn sẽ cần đăng nhập lại'));
     }
   }
 }
