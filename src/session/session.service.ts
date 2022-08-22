@@ -1,3 +1,4 @@
+import { red, yellow } from 'chalk';
 import { load } from 'cheerio';
 import { stringify } from 'querystring';
 import { jar } from 'request';
@@ -28,6 +29,7 @@ export class SessionService {
     const newSession = jar();
 
     let requestVerificationToken: string;
+    let retryCounter = 0;
 
     do {
       try {
@@ -43,6 +45,12 @@ export class SessionService {
         ).val() as string;
       } catch (err) {
         if (!force) throw err;
+
+        console.log(
+          `${red('Đăng nhập không thành công, thử lại lần')} ${yellow(
+            ++retryCounter,
+          )}`,
+        );
 
         await wait();
       }
@@ -65,6 +73,12 @@ export class SessionService {
         });
       } catch (err) {
         if (!force) throw err;
+
+        console.log(
+          `${red('Đăng nhập không thành công, thử lại lần')} ${yellow(
+            ++retryCounter,
+          )}`,
+        );
 
         await wait();
       }
