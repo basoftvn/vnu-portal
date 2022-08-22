@@ -2,14 +2,13 @@ import { load } from 'cheerio';
 import { stringify } from 'querystring';
 import { jar } from 'request';
 import { Endpoints } from 'src/constants/endpoints';
+import { wait } from 'src/helpers/wait';
 
 import { Injectable, Scope } from '@nestjs/common';
 
 import { SessionStoreService } from './session-store.service';
 
 import request = require('request-promise-native');
-import { sleep } from 'src/helpers/sleep';
-import { bySeconds } from 'src/helpers/timespan';
 
 @Injectable({
   scope: Scope.DEFAULT,
@@ -28,16 +27,26 @@ export class SessionService {
   ): Promise<void> {
     const newSession = jar();
 
-    const loginPage = await request(Endpoints.Login, {
-      method: 'GET',
-      jar: newSession,
-    });
+    let requestVerificationToken: string;
 
-    const $loginPage = load(loginPage);
+    do {
+      try {
+        const loginPage = await request(Endpoints.Login, {
+          method: 'GET',
+          jar: newSession,
+        });
 
-    const requestVerificationToken = $loginPage(
-      '[name=__RequestVerificationToken]',
-    ).val();
+        const $loginPage = load(loginPage);
+
+        requestVerificationToken = $loginPage(
+          '[name=__RequestVerificationToken]',
+        ).val() as string;
+      } catch (err) {
+        if (!force) throw err;
+
+        await wait();
+      }
+    } while (force);
 
     do {
       try {
@@ -57,8 +66,7 @@ export class SessionService {
       } catch (err) {
         if (!force) throw err;
 
-        // sleep from 2-5 seconds
-        await sleep(Math.random() * bySeconds(3) + bySeconds(2));
+        await wait();
       }
     } while (force);
 
@@ -72,7 +80,6 @@ export class SessionService {
     if (credentials.username === null || credentials.password === null) return;
 
     try {
-      console.log('called');
       const res = await request(Endpoints.Origin, {
         method: 'GET',
         jar: this.sessionStoreService.getCurrentSession().getCookieJar(),
