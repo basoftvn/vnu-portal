@@ -1,12 +1,14 @@
-import { red, yellow, green } from 'chalk';
+import { green, red, yellow } from 'chalk';
 import { Command, Option, Positional } from 'nestjs-command';
+import { replaceAt } from 'src/helpers/string';
 import { Subject } from 'src/models/subject';
 
 import { Injectable } from '@nestjs/common';
 
-import columnify = require('columnify');
-import { CreditService } from './credit.service';
 import { declaration } from './credit.declaration';
+import { CreditService } from './credit.service';
+
+import columnify = require('columnify');
 
 @Injectable()
 export class CreditController {
@@ -54,32 +56,59 @@ export class CreditController {
       const uCode = code?.toUpperCase();
       const uLecturer = lecturer?.toUpperCase();
 
-      const filteredList: Subject[] = list.filter((subject) => {
-        if (by === 'r') return true;
+      const filteredList: Subject[] = list
+        .map((subject): Subject => {
+          if (by === 'r') return subject;
 
-        if (registrable && subject.invalid) return false;
-        if (!registrable && !subject.invalid) return false;
+          if (registrable && subject.invalid) return null;
+          if (!registrable && !subject.invalid) return null;
 
-        if (
-          typeof name === 'string' &&
-          !subject.name.toUpperCase().includes(uName)
-        )
-          return false;
+          if (typeof name === 'string') {
+            const index = subject.name.toUpperCase().indexOf(uName);
 
-        if (
-          typeof code === 'string' &&
-          !subject.code.toUpperCase().includes(uCode)
-        )
-          return false;
+            if (index === -1) return null;
 
-        if (
-          typeof lecturer === 'string' &&
-          !subject.lecturer.join('\n').toUpperCase().includes(uLecturer)
-        )
-          return false;
+            subject.name = replaceAt(
+              subject.name,
+              index,
+              green(subject.name.slice(index, index + uName.length)),
+              uName.length,
+            );
+          }
 
-        return true;
-      });
+          if (typeof code === 'string') {
+            const index = subject.code.toUpperCase().indexOf(uCode);
+
+            if (index === -1) return null;
+
+            subject.code = replaceAt(
+              subject.code,
+              index,
+              green(subject.code.slice(index, index + uCode.length)),
+              uCode.length,
+            );
+          }
+
+          if (typeof lecturer === 'string') {
+            const indices = subject.lecturer.map((l) =>
+              l.toUpperCase().indexOf(uLecturer),
+            );
+
+            if (!indices.find((i) => i !== -1)) return null;
+
+            subject.lecturer = subject.lecturer.map((l, i) =>
+              replaceAt(
+                l,
+                indices[i],
+                green(l.slice(indices[i], indices[i] + uLecturer.length)),
+                uLecturer.length,
+              ),
+            );
+          }
+
+          return subject;
+        })
+        .filter((s) => s);
 
       console.log(
         columnify(
