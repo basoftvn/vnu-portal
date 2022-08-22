@@ -54,7 +54,7 @@ const listCommand: CommandDeclaration<
   },
 };
 
-const registerCommand: CommandDeclaration<'creditIds', 'force'> = {
+const registerCommand: CommandDeclaration<'creditIds', 'force' | 'verbose'> = {
   command: {
     command: 'credit:register <creditIds...>',
     describe: 'Đăng ký môn học',
@@ -71,6 +71,13 @@ const registerCommand: CommandDeclaration<'creditIds', 'force'> = {
       name: 'force',
       alias: 'f',
       describe: 'Thử đăng ký tới khi được',
+      type: 'boolean',
+      default: false,
+    },
+    verbose: {
+      name: 'verbose',
+      alias: 'vv',
+      describe: 'Hiển thị nhiều thông tin hơn',
       type: 'boolean',
       default: false,
     },
