@@ -1,5 +1,6 @@
-import { red, green, yellow } from 'chalk';
-import { Command, Option, Positional } from 'nestjs-command';
+import { green, red, yellow } from 'chalk';
+import { Command, Option } from 'nestjs-command';
+import { IoService } from 'src/io/io.service';
 
 import { Injectable } from '@nestjs/common';
 
@@ -8,22 +9,22 @@ import { SessionService } from './session.service';
 
 @Injectable()
 export class SessionController {
-  public constructor(private readonly sessionService: SessionService) {}
+  public constructor(
+    private readonly sessionService: SessionService,
+    private readonly ioService: IoService,
+  ) {}
 
   @Command(declaration.login.command)
   public async loginSession(
-    @Positional(declaration.login.positionals.username)
-    username: string,
-    @Positional(declaration.login.positionals.password)
-    password: string,
     @Option(declaration.login.options.force)
     force: boolean,
     @Option(declaration.login.options.verbose)
     verbose: boolean,
   ): Promise<void> {
-    try {
-      console.clear();
+    const username = await this.ioService.input__ask('Mã sinh viên', null);
+    const password = await this.ioService.input__password('    Mật khẩu', null);
 
+    try {
       console.log(yellow('Đã tạo phiên đăng nhập mới...'));
 
       if (verbose)
@@ -47,6 +48,7 @@ export class SessionController {
       console.log(green('Đăng nhập thành công'));
     } catch (err) {
       if (verbose) console.error(red(err.message));
+
       console.error(red('Đăng nhập thất bại'));
     }
   }

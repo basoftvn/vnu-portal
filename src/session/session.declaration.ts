@@ -1,27 +1,11 @@
 import { CommandDeclaration } from 'src/models/command-declaration';
 
-const loginCommand: CommandDeclaration<
-  'username' | 'password',
-  'force' | 'verbose'
-> = {
+const loginCommand: CommandDeclaration<undefined, 'force' | 'verbose'> = {
   command: {
-    command: 'session:login <username> <password>',
+    command: 'session:login',
     describe: 'Đăng nhập vào trang đăng ký học bằng một phiên mới',
   },
-  positionals: {
-    username: {
-      name: 'username',
-      alias: 'u',
-      describe: 'Tên đăng nhập (mã số sinh viên)',
-      type: 'string',
-    },
-    password: {
-      name: 'password',
-      alias: 'p',
-      describe: 'Mật khẩu',
-      type: 'string',
-    },
-  },
+  positionals: {},
   options: {
     force: {
       name: 'force',
