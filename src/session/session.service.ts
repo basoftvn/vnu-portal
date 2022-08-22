@@ -84,7 +84,9 @@ export class SessionService {
       }
     } while (force);
 
-    this.sessionStoreService.setCurrentSessionCookies(newSession);
+    const currentSession = this.sessionStoreService.getCurrentSession();
+    currentSession.setCredentials({ username, password });
+    currentSession.setCookieJar(newSession);
   }
 
   public async wakeSession(): Promise<void> {

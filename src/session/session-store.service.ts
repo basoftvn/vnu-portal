@@ -3,7 +3,6 @@ import { join } from 'path';
 import { LoginSession } from 'src/models/login-session';
 
 import { Injectable, Scope } from '@nestjs/common';
-import { CookieJar } from 'request';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class SessionStoreService {
@@ -18,9 +17,5 @@ export class SessionStoreService {
 
   public getCurrentSession(): LoginSession {
     return this.currentSession;
-  }
-
-  public setCurrentSessionCookies(cookieJar: CookieJar): void {
-    this.currentSession.setCookieJar(cookieJar);
   }
 }
