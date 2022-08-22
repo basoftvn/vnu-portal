@@ -22,18 +22,21 @@ async function bootstrap() {
 
     process.stdout.write('> ');
 
+    let locked = false;
+
     process.stdin.on('data', async (args) => {
-      process.stdin.pause();
+      if (!locked) {
+        locked = true;
 
-      try {
-        await service.exec(parse(args.toString()));
-      } catch (err) {
-        console.error(err.message);
+        try {
+          await service.exec(parse(args.toString()));
+        } catch (err) {
+          console.error(err.message);
+        }
+
+        process.stdout.write('\n> ');
+        locked = false;
       }
-
-      process.stdout.write('\n> ');
-
-      process.stdin.resume();
     });
   } catch (error) {
     console.error(error);
