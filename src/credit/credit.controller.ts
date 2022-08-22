@@ -105,9 +105,11 @@ export class CreditController {
     creditIds: number[],
     @Option(declaration.register.options.force)
     force: boolean,
+    @Option(declaration.register.options.verbose)
+    verbose: boolean,
   ): Promise<void> {
     try {
-      if (force)
+      if (force && verbose)
         console.log(
           yellow(
             'Bạn đã sử dụng flag --force, đăng kí học sẽ được thử đến khi đăng kí được',
@@ -141,16 +143,18 @@ export class CreditController {
       console.log(green('Tất cả các Id hợp lệ'));
 
       const result = await Promise.all(
-        [...creditIdSet].map((id) =>
-          this.creditService.registerCredit(id, force),
-        ),
+        [...creditIdSet].map((id) => this.creditService.select(id, force)),
       );
+
+      await this.creditService.confirmSelections();
 
       console.log(
         `Đăng ký thành công [${green(result.filter((r) => r)).length}] lớp học`,
       );
     } catch (err) {
-      console.error(red(err.message));
+      if (verbose) console.error(red(err.message));
+
+      console.error(red('Đăng ký học không thành công'));
     }
   }
 }

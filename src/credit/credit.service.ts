@@ -80,35 +80,38 @@ export class CreditService {
     return result;
   }
 
-  public registerCredit(id: number, force: boolean): Promise<boolean> {
-    return new Promise(async (resolve) => {
-      try {
-        const jar = this.sessionStoreService.getCurrentSession().getCookieJar();
+  public async select(id: number, force: boolean): Promise<void> {
+    const jar = this.sessionStoreService.getCurrentSession().getCookieJar();
+    let succeeded = false;
 
-        const selectRes = await request(
-          Endpoints.Select.replace('$', id.toString()),
-          {
-            method: 'POST',
-            jar,
-            json: true,
-          },
-        );
-
-        if (!selectRes.success) throw new Error(selectRes.message);
-
-        const confirmRes = await request(Endpoints.ConfirmRegistration, {
+    do {
+      const selectRes = await request(
+        Endpoints.Select.replace('$', id.toString()),
+        {
           method: 'POST',
           jar,
           json: true,
-        });
+        },
+      );
 
-        if (!confirmRes.success) throw new Error(confirmRes.message);
-
-        resolve(true);
-      } catch (err) {
-        console.error(err.message);
-        resolve(false);
+      if (selectRes.success) {
+        succeeded = true;
+        continue;
       }
+
+      if (!selectRes.success && !force) throw new Error(selectRes.message);
+    } while (force && !succeeded);
+  }
+
+  public async confirmSelections(): Promise<void> {
+    const jar = this.sessionStoreService.getCurrentSession().getCookieJar();
+
+    const confirmRes = await request(Endpoints.ConfirmRegistration, {
+      method: 'POST',
+      jar,
+      json: true,
     });
+
+    if (!confirmRes.success) throw new Error(confirmRes.message);
   }
 }
