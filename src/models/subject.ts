@@ -5,7 +5,8 @@ export type Subject = {
   code: string;
   maxSlots: number;
   currentSlots: number;
-  lecturer: string;
+  lecturer: string[];
   fee: number;
-  schedule: string;
+  schedule: string[];
+  invalid: boolean;
 };

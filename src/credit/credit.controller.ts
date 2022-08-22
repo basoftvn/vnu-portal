@@ -20,6 +20,7 @@ export class CreditController {
     lecturer: 'Giảng viên',
     fee: 'Học phí',
     schedule: 'Lịch học',
+    invalid: '',
   };
 
   public constructor(private readonly creditService: CreditService) {}
@@ -56,8 +57,8 @@ export class CreditController {
       const filteredList: Subject[] = list.filter((subject) => {
         if (by === 'r') return true;
 
-        if (registrable === true && subject.id === -1) return false;
-        if (registrable === false && subject.id !== -1) return false;
+        if (registrable && subject.invalid) return false;
+        if (!registrable && !subject.invalid) return false;
 
         if (
           typeof name === 'string' &&
@@ -73,7 +74,7 @@ export class CreditController {
 
         if (
           typeof lecturer === 'string' &&
-          !subject.lecturer.toUpperCase().includes(uLecturer)
+          !subject.lecturer.join('\n').toUpperCase().includes(uLecturer)
         )
           return false;
 
@@ -81,11 +82,29 @@ export class CreditController {
       });
 
       console.log(
-        columnify(filteredList.slice(limit[0], limit[0] + limit[1]), {
-          columnSplitter: '|',
-          maxLineWidth: process.stdout.getWindowSize()[0],
-          headingTransform: (header) => CreditController.HEADER_MAP[header],
-        }),
+        columnify(
+          filteredList.slice(limit[0], limit[0] + limit[1]).map((subject) => ({
+            ...subject,
+            lecturer: subject.lecturer.join('\n'),
+            schedule: subject.schedule.join('\n'),
+          })),
+          {
+            columnSplitter: '|',
+            maxLineWidth: process.stdout.getWindowSize()[0],
+            headingTransform: (header) => CreditController.HEADER_MAP[header],
+            columns: Object.keys(filteredList[0]).filter(
+              (l) => l !== 'invalid',
+            ),
+            config: {
+              lecturer: {
+                preserveNewLines: true,
+              },
+              schedule: {
+                preserveNewLines: true,
+              },
+            },
+          },
+        ),
       );
 
       if (by === 'r')
