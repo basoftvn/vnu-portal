@@ -44,6 +44,8 @@ export class CreditController {
     @Option(declaration.list.options.verbose)
     verbose: boolean,
   ): Promise<void> {
+    process.stdin.pause();
+
     try {
       if (!_limit.match(/^\d+\-\d+$/)) {
         console.error('Giới hạn không hợp lệ');
@@ -149,6 +151,8 @@ export class CreditController {
 
       console.error(red('Đăng ký học không thành công'));
     }
+
+    process.stdin.resume();
   }
 
   @Command(declaration.register.command)
@@ -160,6 +164,8 @@ export class CreditController {
     @Option(declaration.register.options.verbose)
     verbose: boolean,
   ): Promise<void> {
+    process.stdin.pause();
+
     try {
       if (force && verbose)
         console.log(
@@ -208,5 +214,7 @@ export class CreditController {
 
       console.error(red('Đăng ký học không thành công'));
     }
+
+    process.stdin.resume();
   }
 }
